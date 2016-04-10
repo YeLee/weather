@@ -1,9 +1,11 @@
 # weather
 Yet another weather forecast for OpenWeatherMap
+
 ## Introduction 介绍
 这是一个用Qt5写的天气预报程序
 *`weather_config` 是配置程序，该部分代码兼容Qt4和Qt5。
 *`weather` 是主程序，该部分采用Qt5。
+
 ## Build 编译
 ### 获取源代码
 ```
@@ -23,6 +25,7 @@ cd weather
 /usr/lib/qt5/bin/qmake （仅限Qt5版qmake）
 make
 ```
+
 ## Configure 配置程序
 把`weather`主程序、`weather_config`配置前端和`weather_config.db`城市列表数据库拷贝到同一目录下即可。
 到[OpenWeatherMap](http://www.openweathermap.org/)去申请一个免费的APPID。
@@ -36,5 +39,6 @@ make
 * `AutoCloseWindow` 鼠标不在主窗口内自动关闭主窗体（单位为秒）
 * `APPID` OpenWeatherMap APPID
 * `Submit` 在程序其目录下生成`weather.ini`并退出（这里没有任何提示）
+
 ## Running 运行程序
 使用一台联网的计算机打开`weather`，点击托盘菜单的`Show`即可查看天气信息
