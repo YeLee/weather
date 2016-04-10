@@ -3,8 +3,8 @@ Yet another weather forecast for OpenWeatherMap
 
 ## Introduction 介绍
 这是一个用Qt5写的天气预报程序
-*`weather_config` 是配置程序，该部分代码兼容Qt4和Qt5。
-*`weather` 是主程序，该部分采用Qt5。
+* `weather` 主程序，该部分采用Qt5。
+* `weather_config` 配置程序，该部分代码兼容Qt4和Qt5。
 
 ## Build 编译
 ### 获取源代码
