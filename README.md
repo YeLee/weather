@@ -28,8 +28,10 @@ make
 
 ## Configure 配置程序
 把`weather`主程序、`weather_config`配置前端和`weather_config.db`城市列表数据库拷贝到同一目录下即可。
+
 到[OpenWeatherMap](http://www.openweathermap.org/)去申请一个免费的APPID。
-打开`weather_config`，配置程序：
+
+### 打开`weather_config`，配置程序：
 * `Country` 国家代码（ISO 3166 Country codes）
 * `City` 城市对应的英文名称
 * `City Information` 城市信息，包含城市代码和经纬度，重复名称用下拉列表选择
