@@ -29,7 +29,7 @@ CityList::CityList(QString &name)
     initialized = true;
 }
 
-QSharedPointer<QList<QString>> CityList::GetList() {
+QSharedPointer<QList<QString>> CityList::GetCountryList() {
     QSharedPointer<QList<QString>> list(new QList<QString>);
     QString sql = "SELECT DISTINCT country FROM ";
     sql += TableName;
@@ -42,7 +42,7 @@ QSharedPointer<QList<QString>> CityList::GetList() {
     return list;
 }
 
-QSharedPointer<QList<QString>> CityList::GetList(QString &country) {
+QSharedPointer<QList<QString>> CityList::GetCityList(QString &country) {
     QSharedPointer<QList<QString>> list(new QList<QString>);
     QString sql = "SELECT DISTINCT name FROM ";
     sql += TableName;
@@ -57,7 +57,7 @@ QSharedPointer<QList<QString>> CityList::GetList(QString &country) {
     return list;
 }
 
-QSharedPointer<QList<QSharedPointer<CityInfo>>> CityList::GetList(
+QSharedPointer<QList<QSharedPointer<CityInfo>>> CityList::GetCityInfoList(
 QString &country, QString &name) {
     QSharedPointer<QList<QSharedPointer<CityInfo>>>
     list(new QList<QSharedPointer<CityInfo>>);
@@ -79,4 +79,31 @@ QString &country, QString &name) {
         list->append(info);
     }
     return list;
+}
+
+std::tuple<CityInfo, QString, QString> CityList::GetCityInfoById(const QString& id)
+{
+    std::tuple<CityInfo, QString, QString> ret;
+    QSqlQuery query;
+
+    QString prepareSql = "SELECT _id, coord_lon, coord_lat, country, name FROM ";
+    prepareSql += TableName;
+    prepareSql += " WHERE _id=:id;";
+    query.prepare(prepareSql);
+
+    query.bindValue(":id", id);
+
+    if (!query.exec()) {
+        QMessageBox::critical(0, QObject::tr("Database Error"),
+                              query.lastError().text());
+        return ret;
+    }
+
+    if (query.next()) {
+        ret = std::make_tuple(CityInfo(query.value(0).toString(), query.value(1).toFloat(), query.value(2).toFloat()),
+                              query.value(3).toString(),
+                              query.value(4).toString());
+    }
+
+    return ret;
 }
