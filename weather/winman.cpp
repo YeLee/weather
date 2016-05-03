@@ -2,6 +2,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QVBoxLayout>
+#include <QIcon>
 #include "winman.hpp"
 #include "weatherinfo.hpp"
 
@@ -20,6 +21,8 @@ void Widget::closeEvent(QCloseEvent *event) {
 void Widget::Window(WeatherInfo *wi) {
     QVBoxLayout *mainFrame = new QVBoxLayout;
     QHBoxLayout *lineFrame = new QHBoxLayout;
+    this->setWindowIcon(QIcon(":/weather.png"));
+
     QString text = QString("%1(%2)").arg(wi->GetCityName())
                    .arg(wi->GetCountry());
     QLabel *Label = new QLabel;
