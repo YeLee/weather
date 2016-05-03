@@ -139,63 +139,66 @@ void ConfigWin::loadSettings()
 {
     qDebug() << __func__ << this->setting->fileName();
     QFileInfo finfo(this->setting->fileName());
-    try {
-        if (finfo.isReadable()) {
 
-            QString     id      = setting->value(AppName+"/"+"id").toString();
-            QString     lang    = setting->value(AppName+"/"+"lang").toString();
-            QString     units   = setting->value(AppName+"/"+"units").toString();
+    if (finfo.isReadable() && 
+        setting->contains(AppName+"/"+"id") &&
+        setting->contains(AppName+"/"+"lang") &&
+        setting->contains(AppName+"/"+"units") &&
+        setting->contains(AppName+"/"+"appid") &&
+        setting->contains(AppName+"/"+"freq") &&
+        setting->contains(AppName+"/"+"timeout"))
+    {
+        QString     id      = setting->value(AppName+"/"+"id").toString();
+        QString     lang    = setting->value(AppName+"/"+"lang").toString();
+        QString     units   = setting->value(AppName+"/"+"units").toString();
 
-            QString     appid   = setting->value(AppName+"/"+"appid").toString();
-            int         freq    = setting->value(AppName+"/"+"freq").toInt();
-            int         timeout = setting->value(AppName+"/"+"timeout").toInt();
+        QString     appid   = setting->value(AppName+"/"+"appid").toString();
+        int         freq    = setting->value(AppName+"/"+"freq").toInt();
+        int         timeout = setting->value(AppName+"/"+"timeout").toInt();
 
-            auto cityInfo = this->citylist->GetCityInfoById(id);
+        auto cityInfo = this->citylist->GetCityInfoById(id);
 
-            if (!std::get<0>(cityInfo).CityID.isEmpty()) {
+        if (!std::get<0>(cityInfo).CityID.isEmpty()) {
 
-                // 由于是单线程UI截面，并且connect动作是 Qt::DirectConnection
-                // 这样，可以保证界面的修改的"原子性"！
-                this->cbNation.setCurrentText(std::get<1>(cityInfo));
+            // 由于是单线程UI截面，并且connect动作是 Qt::DirectConnection
+            // 这样，可以保证界面的修改的"原子性"！
+            this->cbNation.setCurrentText(std::get<1>(cityInfo));
 
-                this->cbCity.setCurrentText(std::get<2>(cityInfo));
-            }
-
-            int langIndex = locate_if(WeatherLanguage,
-                                      [&lang](const LangInfo_t& li)->bool {
-                                          return li.shortName == lang;
-                                      });
-
-            qDebug() << VALUE_MSG(langIndex);
-            if (langIndex >= 0)
-            {
-                this->cblang.setCurrentIndex(langIndex);
-                qDebug() << VALUE_MSG(cblang.currentIndex());
-            }
-
-            int unitsIndex = locate_if(TemperatureType,
-                                       [&units](const TemperatureUnit_t& tu)->bool {
-                                           return tu.shortName == units;
-                                       });
-            qDebug() << VALUE_MSG(unitsIndex);
-            if (unitsIndex >= 0)
-            {
-                this->cbtemp.setCurrentIndex(unitsIndex);
-                qDebug() << VALUE_MSG(cbtemp.currentIndex());
-            }
-
-            if (freq > 0) {
-                this->UpdateFreq.setText(QString::number(freq));
-            }
-            if (timeout > 0) {
-                this->AutoClose.setText(QString::number(timeout));
-            }
-            if (!appid.isEmpty()) {
-                this->APPID.setText(appid);
-            }
+            this->cbCity.setCurrentText(std::get<2>(cityInfo));
         }
-    }
-    catch (...){
+
+        int langIndex = locate_if(WeatherLanguage,
+                                  [&lang](const LangInfo_t& li)->bool {
+                                      return li.shortName == lang;
+                                  });
+
+        qDebug() << VALUE_MSG(langIndex);
+        if (langIndex >= 0)
+        {
+            this->cblang.setCurrentIndex(langIndex);
+            qDebug() << VALUE_MSG(cblang.currentIndex());
+        }
+
+        int unitsIndex = locate_if(TemperatureType,
+                                   [&units](const TemperatureUnit_t& tu)->bool {
+                                       return tu.shortName == units;
+                                   });
+        qDebug() << VALUE_MSG(unitsIndex);
+        if (unitsIndex >= 0)
+        {
+            this->cbtemp.setCurrentIndex(unitsIndex);
+            qDebug() << VALUE_MSG(cbtemp.currentIndex());
+        }
+
+        if (freq > 0) {
+            this->UpdateFreq.setText(QString::number(freq));
+        }
+        if (timeout > 0) {
+            this->AutoClose.setText(QString::number(timeout));
+        }
+        if (!appid.isEmpty()) {
+            this->APPID.setText(appid);
+        }
     }
 }
 
