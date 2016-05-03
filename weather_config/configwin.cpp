@@ -2,8 +2,19 @@
 #include <QHBoxLayout>
 #include <QObject>
 #include <QVBoxLayout>
+#include <QFileInfo>
+#include <QDebug>
+
+#include <algorithm>
+#include <functional>
+
 #include "configwin.hpp"
 #include "userdef.hpp"
+#include "citylist.hpp"
+
+#ifndef VALUE_MSG
+#define VALUE_MSG(a) (#a) << " = " << (a);
+#endif
 
 ConfigWin::ConfigWin(QString &path, QString &Name, QWidget *parent)
     : QMainWindow(parent),
@@ -12,75 +23,76 @@ ConfigWin::ConfigWin(QString &path, QString &Name, QWidget *parent)
 {
 }
 
+ConfigWin::~ConfigWin()
+{
+}
+
 void ConfigWin::addWidgets(CityList &list)
 {
     citylist = &list;
-    QSharedPointer<QList<QString>> country = citylist->GetList();
-for(QString str : *country) {
-        cbc.addItem(str);
+    QSharedPointer<QList<QString>> country = citylist->GetCountryList();
+    for(QString str : *country) {
+        cbNation.addItem(str);
     }
     QVBoxLayout *vbox = new QVBoxLayout;
 
     QHBoxLayout *bcb = new QHBoxLayout;
     QGridLayout *glc = new QGridLayout;
-    QLabel *lbc = new QLabel;
-    lbc->setAttribute(Qt::WA_DeleteOnClose);
-    lbc->setText(tr("Country:"));
+    QLabel *lbc = new QLabel(tr("Country:"));
+    // lbc->setAttribute(Qt::WA_DeleteOnClose);
+    lbc->setBuddy(&cbNation);
     glc->addWidget(lbc);
-    glc->addWidget(&cbc);
+    glc->addWidget(&cbNation);
     bcb->addLayout(glc);
     QGridLayout *gln = new QGridLayout;
-    QLabel *lbn = new QLabel;
-    lbn->setAttribute(Qt::WA_DeleteOnClose);
-    lbn->setText(tr("City:"));
+    QLabel *lbn = new QLabel(tr("City:"));
+    // lbn->setAttribute(Qt::WA_DeleteOnClose);
+    lbn->setBuddy(&cbCity);
     gln->addWidget(lbn);
-    gln->addWidget(&cbn);
+    gln->addWidget(&cbCity);
     bcb->addLayout(gln);
     vbox->addLayout(bcb);
 
     QGridLayout *glci = new QGridLayout;
-    QLabel *lbci = new QLabel;
-    lbci->setAttribute(Qt::WA_DeleteOnClose);
-    lbci->setText(tr("City Information:"));
+    QLabel *lbci = new QLabel(tr("City Information:"));
+    lbci->setBuddy(&cbCityInfo);
     glci->addWidget(lbci);
-    glci->addWidget(&cbci);
+    glci->addWidget(&cbCityInfo);
     vbox->addLayout(glci);
 
     QHBoxLayout *lbt = new QHBoxLayout;
     QGridLayout *gllang = new QGridLayout;
-    QLabel *lblang = new QLabel;
-    lblang->setAttribute(Qt::WA_DeleteOnClose);
-    lblang->setText(tr("Language:"));
+    QLabel *lblang = new QLabel(tr("Language:"));
+    lblang->setBuddy(&cblang);
     gllang->addWidget(lblang);
     gllang->addWidget(&cblang);
     lbt->addLayout(gllang);
     QGridLayout *gltemp = new QGridLayout;
-    QLabel *lbtemp = new QLabel;
-    lbtemp->setAttribute(Qt::WA_DeleteOnClose);
-    lbtemp->setText(tr("Temperature:"));
+    QLabel *lbtemp = new QLabel(tr("Temperature:"));
+    lbtemp->setBuddy(&cbtemp);
     gltemp->addWidget(lbtemp);
     gltemp->addWidget(&cbtemp);
     lbt->addLayout(gltemp);
     vbox->addLayout(lbt);
-    for(int i=0; i != LangCount; i++) {
-        cblang.addItem(WeatherLanguage[i][0]);
+
+    for(const auto & item : WeatherLanguage) {
+        cblang.addItem(item.fullName);
     }
-    for(int i=0; i != TempTypeCount; i++) {
-        cbtemp.addItem(TemperatureType[i][0]);
+    for(const auto & item : TemperatureType) {
+        cbtemp.addItem(item.name);
     }
 
     QHBoxLayout *lbe = new QHBoxLayout;
     QGridLayout *glfreq = new QGridLayout;
-    QLabel *lbFreq = new QLabel;
-    lbFreq->setAttribute(Qt::WA_DeleteOnClose);
-    lbFreq->setText(tr("Update Frequency(min):"));
+    QLabel *lbFreq = new QLabel(tr("Update Frequency(min):"));
+    lbFreq->setBuddy(&UpdateFreq);
     glfreq->addWidget(lbFreq);
     glfreq->addWidget(&UpdateFreq);
     lbe->addLayout(glfreq);
     QGridLayout *glclose = new QGridLayout;
-    QLabel *lbClose = new QLabel;
+    QLabel *lbClose = new QLabel(tr("AutoCloseWindow(s):"));
     lbClose->setAttribute(Qt::WA_DeleteOnClose);
-    lbClose->setText(tr("AutoCloseWindow(s):"));
+    lbClose->setBuddy(&AutoClose);
     glclose->addWidget(lbClose);
     glclose->addWidget(&AutoClose);
     lbe->addLayout(glclose);
@@ -88,15 +100,14 @@ for(QString str : *country) {
 
     QHBoxLayout *lbs = new QHBoxLayout;
     QGridLayout *glapp = new QGridLayout;
-    QLabel *lbAPPID = new QLabel;
-    lbAPPID->setAttribute(Qt::WA_DeleteOnClose);
-    lbAPPID->setText(tr("APPID:"));
+    QLabel *lbAPPID = new QLabel(tr("APPID:"));
+    lbAPPID->setBuddy(&APPID);
     glapp->addWidget(lbAPPID);
     glapp->addWidget(&APPID);
     lbs->addLayout(glapp);
     QGridLayout *glsubmit = new QGridLayout;
-    QLabel *lbsubmit = new QLabel;
-    lbsubmit->setAttribute(Qt::WA_DeleteOnClose);
+
+    QLabel *lbsubmit = new QLabel;// 仅用于占位
     Submit.setText(tr("Submit"));
     glsubmit->addWidget(lbsubmit);
     glsubmit->addWidget(&Submit);
@@ -107,51 +118,119 @@ for(QString str : *country) {
     wm->setLayout(vbox);
     this->setCentralWidget(wm);
 
-    QObject::connect(&cbc, SIGNAL(currentIndexChanged(int)),
-                     this, SLOT(UpdateCBN(int)));
-    QObject::connect(&cbn, SIGNAL(currentIndexChanged(int)),
-                     this, SLOT(UpdateLBCI(int)));
-    QObject::connect(&Submit, SIGNAL(released()),
-                     this, SLOT(SubmitData()));
-
-    return;
+    QObject::connect(&cbNation, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+                     this, &ConfigWin::UpdateCBCity);
+    QObject::connect(&cbCity, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+                     this, &ConfigWin::UpdateLBCityInfo);
+    QObject::connect(&Submit, &QPushButton::clicked,
+                     this, &ConfigWin::SubmitData);
 }
 
-ConfigWin::~ConfigWin()
+template<typename T, size_t N, typename Func> int locate_if(T (&a)[N], Func f)
 {
-
+    auto iter = std::find_if(std::begin(a), std::end(a), f);
+    if (iter == std::end(a)) {
+        return -1;
+    }
+    return std::distance(std::begin(a), iter);
 }
 
-void ConfigWin::UpdateCBN(int idx)
+void ConfigWin::loadSettings()
 {
-    QString str = cbc.itemText(idx);
-    QSharedPointer<QList<QString>> name = citylist->GetList(str);
+    qDebug() << __func__ << this->setting->fileName();
+    QFileInfo finfo(this->setting->fileName());
+    try {
+        if (finfo.isReadable()) {
 
-    cbn.clear();
-for(QString str : *name) {
-        cbn.addItem(str);
+            QString     id      = setting->value(AppName+"/"+"id").toString();
+            QString     lang    = setting->value(AppName+"/"+"lang").toString();
+            QString     units   = setting->value(AppName+"/"+"units").toString();
+
+            QString     appid   = setting->value(AppName+"/"+"appid").toString();
+            int         freq    = setting->value(AppName+"/"+"freq").toInt();
+            int         timeout = setting->value(AppName+"/"+"timeout").toInt();
+
+            auto cityInfo = this->citylist->GetCityInfoById(id);
+
+            if (!std::get<0>(cityInfo).CityID.isEmpty()) {
+
+                // 由于是单线程UI截面，并且connect动作是 Qt::DirectConnection
+                // 这样，可以保证界面的修改的"原子性"！
+                this->cbNation.setCurrentText(std::get<1>(cityInfo));
+
+                this->cbCity.setCurrentText(std::get<2>(cityInfo));
+            }
+
+            int langIndex = locate_if(WeatherLanguage,
+                                      [&lang](const LangInfo_t& li)->bool {
+                                          return li.shortName == lang;
+                                      });
+
+            qDebug() << VALUE_MSG(langIndex);
+            if (langIndex >= 0)
+            {
+                this->cblang.setCurrentIndex(langIndex);
+                qDebug() << VALUE_MSG(cblang.currentIndex());
+            }
+
+            int unitsIndex = locate_if(TemperatureType,
+                                       [&units](const TemperatureUnit_t& tu)->bool {
+                                           return tu.shortName == units;
+                                       });
+            qDebug() << VALUE_MSG(unitsIndex);
+            if (unitsIndex >= 0)
+            {
+                this->cbtemp.setCurrentIndex(unitsIndex);
+                qDebug() << VALUE_MSG(cbtemp.currentIndex());
+            }
+
+            if (freq > 0) {
+                this->UpdateFreq.setText(QString::number(freq));
+            }
+            if (timeout > 0) {
+                this->AutoClose.setText(QString::number(timeout));
+            }
+            if (!appid.isEmpty()) {
+                this->APPID.setText(appid);
+            }
+        }
+    }
+    catch (...){
     }
 }
 
-void ConfigWin::UpdateLBCI(int idx)
+void ConfigWin::UpdateCBCity(int idx)
 {
-    QString str = cbn.itemText(idx);
-    QString cbctext = cbc.currentText();
-    QString cbntext = cbn.currentText();
+    QString str = cbNation.itemText(idx);
+    QSharedPointer<QList<QString>> name = citylist->GetCityList(str);
+
+    cbCity.clear();
+    for(QString str : *name) {
+        cbCity.addItem(str);
+    }
+    cbCity.setCurrentIndex(-1);
+    qDebug() << __func__ << this->cbCity.count();
+}
+
+void ConfigWin::UpdateLBCityInfo(int idx)
+{
+    QString str = cbCity.itemText(idx);
+    QString cbctext = cbNation.currentText();
+    QString cbntext = cbCity.currentText();
     cbntext.replace("\'", "\'\'");
-    info = citylist->GetList(cbctext, cbntext);
-    cbci.clear();
-for(QSharedPointer<CityInfo> swap: *info) {
+    info = citylist->GetCityInfoList(cbctext, cbntext);
+    cbCityInfo.clear();
+    for(QSharedPointer<CityInfo> swap: *info) {
         QString text;
         text = tr("CityID:%1 Longitude:%2 Latitude:%3")
-               .arg(swap->CityID).arg(swap->coord_lon).arg(swap->coord_lat);
-        cbci.addItem(text);
+            .arg(swap->CityID).arg(swap->coord_lon).arg(swap->coord_lat);
+        cbCityInfo.addItem(text);
     }
 }
 
 void ConfigWin::SubmitData()
 {
-    int idx = cbci.currentIndex();
+    int idx = cbCityInfo.currentIndex();
     if(idx == -1) return;
     QString id = APPID.text();
     if(id.length() == 0)  return;
@@ -162,10 +241,12 @@ void ConfigWin::SubmitData()
 
     QSharedPointer<CityInfo> io = info->at(idx);
     setting->setValue("id", io->CityID);
+
     setting->setValue("lang",
-                      WeatherLanguage[cblang.currentIndex()][1]);
+                      WeatherLanguage[cblang.currentIndex()].shortName);
     setting->setValue("units",
-                      TemperatureType[cbtemp.currentIndex()][1]);
+                      TemperatureType[cbtemp.currentIndex()].shortName);
+
     setting->setValue("appid", id);
     setting->setValue("freq", freq);
     setting->setValue("timeout", close);

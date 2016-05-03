@@ -13,26 +13,32 @@ class ConfigWin : public QMainWindow
 {
     Q_OBJECT
 private:
-    QComboBox cbc;
-    QComboBox cbn;
-    QComboBox cbci;
+    QComboBox cbNation;
+    QComboBox cbCity;
+    QComboBox cbCityInfo;
     QComboBox cblang;
     QComboBox cbtemp;
     QLineEdit APPID;
     QLineEdit UpdateFreq;
     QLineEdit AutoClose;
+
     QPushButton Submit;
     CityList *citylist;
     QSharedPointer<QList<QSharedPointer<CityInfo>>> info;
     QSharedPointer<QSettings> setting;
     QString AppName;
+
 public:
     ConfigWin(QString &path, QString &Name, QWidget *parent = 0);
-    void addWidgets(CityList &list);
     ~ConfigWin();
+
+public:
+    void addWidgets(CityList &list);
+    void loadSettings();
+
 public slots:
-    void UpdateCBN(int idx);
-    void UpdateLBCI(int idx);
+    void UpdateCBCity(int idx);
+    void UpdateLBCityInfo(int idx);
     void SubmitData();
 };
 
