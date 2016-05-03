@@ -71,3 +71,7 @@ weather_config/city.list.json.gz
 weather/weather
 weather_config/weather_config
 
+**/moc_*.cpp
+**/qrc_*.cpp
+
+FIXME.TODO.txt
