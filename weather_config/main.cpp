@@ -38,6 +38,7 @@ int main(int argc, char *argv[])
     path += ".ini";
     ConfigWin win(path, AppName);
     win.addWidgets(list);
+    win.loadSettings();
     win.show();
 
     return app.exec();
