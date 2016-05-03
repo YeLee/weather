@@ -1,8 +1,12 @@
 #!/bin/bash
 arg=${1}
+echo $arg
 arg=${arg##*/}
-arg=${arg/./_}
+echo $arg
+arg=${arg#.#_}
+echo $arg
 arg=${arg%.gz}
+echo $arg
 arg=${arg%.json}
 echo $arg
 
