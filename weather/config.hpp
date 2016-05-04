@@ -4,28 +4,22 @@
 
 class config {
 public:
-    qulonglong id;
-    QString lang;
-    QString units;
-    QString appid;
-    int freq;
-    int timeout;
+    qulonglong  id;
+    QString     lang;
+    QString     units;
+    QString     appid;
+    int         freq;
+    int         timeout;
+
     config(QString AppName, QString path) {
-        QVariant var;
         QSettings setting(path, QSettings::IniFormat);
 
-        var = setting.value(AppName+"/"+"id");
-        id = var.toULongLong();//
-        var = setting.value(AppName+"/"+"lang");
-        lang = var.toString();
-        var = setting.value(AppName+"/"+"units");
-        units = var.toString();
-        var = setting.value(AppName+"/"+"appid");
-        appid = var.toString();
-        var = setting.value(AppName+"/"+"freq");
-        freq = var.toInt();
-        var = setting.value(AppName+"/"+"timeout");
-        timeout = var.toInt();
+        id      = setting.value(AppName+"/"+"id").toULongLong();//
+        lang    = setting.value(AppName+"/"+"lang").toString();
+        units   = setting.value(AppName+"/"+"units").toString();
+        appid   = setting.value(AppName+"/"+"appid").toString();
+        freq    = setting.value(AppName+"/"+"freq").toInt();
+        timeout = setting.value(AppName+"/"+"timeout").toInt();
     };
 };
 
